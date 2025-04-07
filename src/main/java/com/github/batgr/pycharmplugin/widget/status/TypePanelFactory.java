@@ -1,4 +1,4 @@
-package com.github.batgr.pythonplugin.widget.status;
+package com.github.batgr.pycharmplugin.widget.status;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class TypePanelFactory implements StatusBarWidgetFactory {
 
-    private final String ID = "com.github.batgr.pythonplugin.widget.status.typepanelfactory";
+    private final String ID = "com.github.batgr.pycharmplugin.widget.status.typepanelfactory";
     @Override
     public @NotNull @NonNls String getId() {
         return ID;

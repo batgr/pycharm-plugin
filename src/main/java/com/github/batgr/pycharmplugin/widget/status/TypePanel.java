@@ -1,4 +1,4 @@
-package com.github.batgr.pythonplugin.widget.status;
+package com.github.batgr.pycharmplugin.widget.status;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsContexts;

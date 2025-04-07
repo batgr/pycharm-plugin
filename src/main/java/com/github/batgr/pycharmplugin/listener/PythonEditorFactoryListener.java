@@ -1,4 +1,4 @@
-package com.github.batgr.pythonplugin.listener;
+package com.github.batgr.pycharmplugin.listener;
 
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.CaretListener;

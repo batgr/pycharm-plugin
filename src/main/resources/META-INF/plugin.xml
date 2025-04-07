@@ -24,11 +24,10 @@
 
 
     <extensions defaultExtensionNs="com.intellij">
-        <statusBarWidgetFactory implementation="com.github.batgr.pythonplugin.widget.status.TypePanelFactory"
-                                id="com.github.batgr.pythonplugin.widget.status.TypePanel"/>
-        <statusBarWidgetFactory implementation="com.github.batgr.pythonplugin.widget.status.TypePanelFactory"
-                                id="com.github.batgr.pycharmp.widget.status.TypePanel"/>
-        <editorFactoryListener implementation="com.github.batgr.pythonplugin.listener.PythonEditorFactoryListener"/>
+        <statusBarWidgetFactory implementation="com.github.batgr.pycharmplugin.widget.status.TypePanelFactory"
+                                id="com.github.batgr.pycharmplugin.widget.status.typepanelfactory"/>
+
+        <editorFactoryListener implementation="com.github.batgr.pycharmplugin.listener.PythonEditorFactoryListener"/>
 
     </extensions>
 
