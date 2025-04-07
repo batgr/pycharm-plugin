@@ -36,13 +36,18 @@ public class PythonTypeCaretListener implements CaretListener {
 
     @Override
     public void caretPositionChanged(@NotNull CaretEvent event) {
+
+        // Get the editor and project
         Editor editor = event.getEditor();
         Project project = editor.getProject();
         if (project == null || project.isDisposed()) {
             return;
         }
 
+        // Commit any pending document changes to ensure PSI is up-to-date
         PsiDocumentManager.getInstance(project).commitDocument(editor.getDocument());
+
+        // Get the PSI file associated with the editor
         PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
 
         if (psiFile == null) {
@@ -50,11 +55,13 @@ public class PythonTypeCaretListener implements CaretListener {
             return;
         }
 
+        // Only process Python files
         if (!(psiFile instanceof PyFile)) {
             updateTypeInfo("", "", project);
             return;
         }
 
+        // Get the PSI element at the caret position
         int offset = editor.getCaretModel().getOffset();
         PsiElement element = psiFile.findElementAt(offset);
 
@@ -63,42 +70,55 @@ public class PythonTypeCaretListener implements CaretListener {
             return;
         }
 
-
+        // Check if element is part of a Python reference expression (e.g., variable or function call)
         PyReferenceExpression refExpr = PsiTreeUtil.getParentOfType(element, PyReferenceExpression.class);
         if (refExpr != null) {
             evaluateAndUpdateType(refExpr, project, psiFile);
             return;
         }
 
-
+        // If not a reference, check if it's any Python typed element
         PyTypedElement typedElement = PsiTreeUtil.getParentOfType(element, PyTypedElement.class);
         if (typedElement != null) {
             evaluateAndUpdateType(typedElement, project, psiFile);
             return;
         }
 
+        // Clear type info if no typed element is found
         updateTypeInfo("", "", project);
     }
 
     private void evaluateAndUpdateType(@NotNull PyTypedElement element, @NotNull Project project, @NotNull PsiFile file) {
+
+        // Use non-blocking read action to evaluate type in the background
         ReadAction.nonBlocking(()->{
+            // Create a type evaluation context for code analysis
             TypeEvalContext context = TypeEvalContext.codeAnalysis(project, file);
+            // Get the element's type and name
             PyType type = context.getType(element);
-            String name = element.getName();
+            String name = element.getName()==null?"Unknown":element.getName();
             String typeName = (type != null) ? type.getName() : "Any";
+
             return new Pair<>(typeName, name);
-        }).expireWhen(project::isDisposed).finishOnUiThread(ModalityState.defaultModalityState(), (result) -> {
+        })
+                .expireWhen(project::isDisposed) // Cancel the operation if the project is disposed
+                .finishOnUiThread(ModalityState.defaultModalityState(), (result) -> {
             updateTypeInfo(result.getFirst(), result.getSecond(), project);
-        }).submit(AppExecutorUtil.getAppExecutorService());
+        }).submit(AppExecutorUtil.getAppExecutorService()); // Submit the task to the application thread pool
 
     }
 
     private void updateTypeInfo(@Nullable String typeName, @Nullable String name, @NotNull Project project) {
+
+        // Invoke on EDT to update UI components
         ApplicationManager.getApplication().invokeLater(() -> {
+            // Get the status bar for the project
             StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
             if (statusBar != null) {
+                // Find our custom status bar widget
                 StatusBarWidget widget = statusBar.getWidget(TypePanel.ID);
                 if (widget instanceof TypePanel pyWidget) {
+                    // Update the text in the widget
                     pyWidget.updateText(project, typeName, name);
                 }
             }
